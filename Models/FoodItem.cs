@@ -1,6 +1,6 @@
-namespace Foods;
+namespace Food.Models;
 
-public class WeatherForecast
+public class FoodItem
 {
     public DateOnly Date { get; set; }
 
