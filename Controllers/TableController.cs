@@ -9,45 +9,45 @@ using FoodSphere.Models;
 
 namespace FoodSphere.Controllers;
 
-[Route("food")]
+[Route("api/[controller]")]
 [ApiController]
-public class FoodController : ControllerBase
+public class TableController : ControllerBase
 {
     private readonly FoodSphereContext _context;
 
-    public FoodController(FoodSphereContext context)
+    public TableController(FoodSphereContext context)
     {
         _context = context;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Food>>> GetFoodItems()
+    public async Task<ActionResult<IEnumerable<Table>>> GetTable()
     {
-        return await _context.Foods.ToListAsync();
+        return await _context.Tables.ToListAsync();
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Food>> GetFoodItem(long id)
+    public async Task<ActionResult<Table>> GetTable(long id)
     {
-        var foodItem = await _context.Foods.FindAsync(id);
+        var table = await _context.Tables.FindAsync(id);
 
-        if (foodItem == null)
+        if (table == null)
         {
             return NotFound();
         }
 
-        return foodItem;
+        return table;
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutFoodItem(long id, Food foodItem)
+    public async Task<IActionResult> PutTable(long id, Table table)
     {
-        if (id != foodItem.Id)
+        if (id != table.Id)
         {
             return BadRequest();
         }
 
-        _context.Entry(foodItem).State = EntityState.Modified;
+        _context.Entry(table).State = EntityState.Modified;
 
         try
         {
@@ -55,7 +55,7 @@ public class FoodController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!FoodItemExists(id))
+            if (!TableExists(id))
             {
                 return NotFound();
             }
@@ -69,31 +69,31 @@ public class FoodController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Food>> PostFoodItem(Food foodItem)
+    public async Task<ActionResult<Table>> PostTable(Table table)
     {
-        _context.Foods.Add(foodItem);
+        _context.Tables.Add(table);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction("GetFoodItem", new { id = foodItem.Id }, foodItem);
+        return CreatedAtAction("GetTable", new { id = table.Id }, table);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteFoodItem(long id)
+    public async Task<IActionResult> DeleteTable(long id)
     {
-        var foodItem = await _context.Foods.FindAsync(id);
-        if (foodItem == null)
+        var table = await _context.Tables.FindAsync(id);
+        if (table == null)
         {
             return NotFound();
         }
 
-        _context.Foods.Remove(foodItem);
+        _context.Tables.Remove(table);
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
-    private bool FoodItemExists(long id)
+    private bool TableExists(long id)
     {
-        return _context.Foods.Any(e => e.Id == id);
+        return _context.Tables.Any(e => e.Id == id);
     }
 }
