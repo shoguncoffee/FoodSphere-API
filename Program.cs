@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
+using FoodSphere.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<FoodService>();
+builder.Services.AddScoped<IngredientService>();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

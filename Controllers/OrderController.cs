@@ -9,16 +9,11 @@ using FoodSphere.Models;
 
 namespace FoodSphere.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
-public class OrderController : ControllerBase
+public class OrderController(FoodSphereContext context) : ControllerBase
 {
-    private readonly FoodSphereContext _context;
-
-    public OrderController(FoodSphereContext context)
-    {
-        _context = context;
-    }
+    private readonly FoodSphereContext _context = context;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Order>>> GetOrders()

@@ -2,7 +2,7 @@ namespace FoodSphere.Models;
 
 public class Restaurant
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required string Name { get; set; }
     public required string Email { get; set; }
     public required string Phone { get; set; }
@@ -12,18 +12,18 @@ public class Restaurant
 
 public class Waiter
 {
-    public int Id { get; set; }
-    public int RestaurantId { get; set; }
-    public required Restaurant Restaurant { get; set; }
+    public long Id { get; set; }
+    public long RestaurantId { get; set; }
+    public Restaurant Restaurant { get; set; } = null!;
     public required string Name { get; set; }
 }
 
 
 public class Table
 {
-    public int Id { get; set; }
-    public int RestaurantId { get; set; }
-    public required Restaurant Restaurant { get; set; }
+    public long Id { get; set; }
+    public long RestaurantId { get; set; }
+    public Restaurant Restaurant { get; set; } = null!;
     public required string Name { get; set; }
     public int Seat { get; set; }
 }

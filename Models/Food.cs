@@ -2,27 +2,27 @@ namespace FoodSphere.Models;
 
 public class Food
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required string Name { get; set; }
     public int Price { get; set; }
-    public List<IngredientItem> Items { get; } = [];
+    public List<FoodIngredientItem> Items { get; } = [];
 }
 
 public class Ingredient
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required string Name { get; set; }
     public int Stock { get; set; }
-    public List<IngredientItem> Items { get; } = [];
+    public List<FoodIngredientItem> Items { get; } = [];
 }
 
 
-public class IngredientItem
+public class FoodIngredientItem
 {
-    public int Id { get; set; }
-    public int FoodId { get; set; }
-    public required Food Food { get; set; }
-    public int IngredientId { get; set; }
-    public required Ingredient Ingredient { get; set; }
+    public long Id { get; set; }
+    public long FoodId { get; set; }
+    public Food Food { get; set; } = null!;
+    public long IngredientId { get; set; }
+    public Ingredient Ingredient { get; set; } = null!;
     public int Amount { get; set; }
 }

@@ -1,61 +1,51 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
+using FoodSphere.Services;
+using FoodSphere.Types;
 
 namespace FoodSphere.Controllers;
 
-[Route("food")]
+[Route("[controller]")]
 [ApiController]
-public class FoodController : ControllerBase
+public class FoodController(FoodService foodService) : ControllerBase
 {
-    private readonly FoodSphereContext _context;
-
-    public FoodController(FoodSphereContext context)
-    {
-        _context = context;
-    }
+    private readonly FoodService _foodService = foodService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Food>>> GetFoodItems()
+    public async Task<ActionResult<IEnumerable<Food>>> GetFoods()
     {
-        return await _context.Foods.ToListAsync();
+        return Ok(await _foodService.Gets());
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Food>> GetFoodItem(long id)
+    public async Task<ActionResult<Food>> GetFood(long id)
     {
-        var foodItem = await _context.Foods.FindAsync(id);
+        var food = await _foodService.Get(id);
 
-        if (foodItem == null)
+        if (food == null)
         {
             return NotFound();
         }
 
-        return foodItem;
+        return food;
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutFoodItem(long id, Food foodItem)
+    public async Task<IActionResult> PutFood(long id, Food food)
     {
-        if (id != foodItem.Id)
+        if (id != food.Id)
         {
             return BadRequest();
         }
 
-        _context.Entry(foodItem).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
+            await _foodService.Update(food);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!FoodItemExists(id))
+            if (!_foodService.Exists(id))
             {
                 return NotFound();
             }
@@ -69,31 +59,30 @@ public class FoodController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Food>> PostFoodItem(Food foodItem)
+    public async Task<ActionResult<Food>> PostFood(FoodBody foodbody)
     {
-        _context.Foods.Add(foodItem);
-        await _context.SaveChangesAsync();
+        var food = new Food
+        {
+            Name = foodbody.Name,
+            Price = foodbody.Price,
+        };
 
-        return CreatedAtAction("GetFoodItem", new { id = foodItem.Id }, foodItem);
+        await _foodService.Add(food, foodbody.Items);
+
+        return CreatedAtAction("GetFood", new { id = food.Id }, food);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteFoodItem(long id)
+    public async Task<IActionResult> DeleteFood(long id)
     {
-        var foodItem = await _context.Foods.FindAsync(id);
-        if (foodItem == null)
+        var food = await _foodService.Get(id);
+        if (food == null)
         {
             return NotFound();
         }
 
-        _context.Foods.Remove(foodItem);
-        await _context.SaveChangesAsync();
+        await _foodService.Remove(food);
 
         return NoContent();
-    }
-
-    private bool FoodItemExists(long id)
-    {
-        return _context.Foods.Any(e => e.Id == id);
     }
 }
