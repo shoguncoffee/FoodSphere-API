@@ -1,25 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
+using FoodSphere.Services;
 
 namespace FoodSphere.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class TableController(FoodSphereContext context) : ControllerBase
+public class TableController(TableService tableService) : ControllerBase
 {
-    private readonly FoodSphereContext _context = context;
+    private readonly TableService _tableService = tableService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Table>>> GetTable()
+    public async Task<ActionResult<IEnumerable<Table>>> GetTables()
     {
-        return await _context.Tables.ToListAsync();
+        var tables = await _tableService.Gets();
+        return Ok(tables);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Table>> GetTable(long id)
     {
-        var table = await _context.Tables.FindAsync(id);
+        var table = await _tableService.Get(id);
 
         if (table == null)
         {
@@ -37,15 +39,13 @@ public class TableController(FoodSphereContext context) : ControllerBase
             return BadRequest();
         }
 
-        _context.Entry(table).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
+            await _tableService.Update(table);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!TableExists(id))
+            if (!_tableService.Exists(id))
             {
                 return NotFound();
             }
@@ -59,10 +59,14 @@ public class TableController(FoodSphereContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Table>> PostTable(Table table)
+    public async Task<ActionResult<Table>> PostTable(Table tablebody)
     {
-        _context.Tables.Add(table);
-        await _context.SaveChangesAsync();
+        var table = new Table
+        {
+            Name = tablebody.Name,
+            Seat = tablebody.Seat
+        };
+        await _tableService.Add(table);
 
         return CreatedAtAction("GetTable", new { id = table.Id }, table);
     }
@@ -70,20 +74,14 @@ public class TableController(FoodSphereContext context) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTable(long id)
     {
-        var table = await _context.Tables.FindAsync(id);
+        var table = await _tableService.Get(id);
         if (table == null)
         {
             return NotFound();
         }
 
-        _context.Tables.Remove(table);
-        await _context.SaveChangesAsync();
+        await _tableService.Remove(table);
 
         return NoContent();
-    }
-
-    private bool TableExists(long id)
-    {
-        return _context.Tables.Any(e => e.Id == id);
     }
 }

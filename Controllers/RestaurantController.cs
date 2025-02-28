@@ -1,25 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
+using FoodSphere.Services;
 
 namespace FoodSphere.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class RestaurantController(FoodSphereContext context) : ControllerBase
+public class RestaurantController(RestaurantService restaurantService) : ControllerBase
 {
-    private readonly FoodSphereContext _context = context;
+    private readonly RestaurantService _restaurantService = restaurantService;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Restaurant>>> GetRestaurants()
     {
-        return await _context.Restaurants.ToListAsync();
+        var restaurants = await _restaurantService.Gets();
+        return Ok(restaurants);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Restaurant>> GetRestaurant(long id)
     {
-        var restaurant = await _context.Restaurants.FindAsync(id);
+        var restaurant = await _restaurantService.Get(id);
 
         if (restaurant == null)
         {
@@ -37,15 +39,13 @@ public class RestaurantController(FoodSphereContext context) : ControllerBase
             return BadRequest();
         }
 
-        _context.Entry(restaurant).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
+            await _restaurantService.Update(restaurant);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!RestaurantExists(id))
+            if (!_restaurantService.Exists(id))
             {
                 return NotFound();
             }
@@ -59,10 +59,16 @@ public class RestaurantController(FoodSphereContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Restaurant>> PostRestaurant(Restaurant restaurant)
+    public async Task<ActionResult<Restaurant>> PostRestaurant(Restaurant restaurantbody)
     {
-        _context.Restaurants.Add(restaurant);
-        await _context.SaveChangesAsync();
+        var restaurant = new Restaurant
+        {
+            Name = restaurantbody.Name,
+            Email = restaurantbody.Email,
+            Phone = restaurantbody.Phone
+        };
+
+        await _restaurantService.Add(restaurant);
 
         return CreatedAtAction("GetRestaurant", new { id = restaurant.Id }, restaurant);
     }
@@ -70,20 +76,14 @@ public class RestaurantController(FoodSphereContext context) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRestaurant(long id)
     {
-        var restaurant = await _context.Restaurants.FindAsync(id);
+        var restaurant = await _restaurantService.Get(id);
         if (restaurant == null)
         {
             return NotFound();
         }
 
-        _context.Restaurants.Remove(restaurant);
-        await _context.SaveChangesAsync();
+        await _restaurantService.Remove(restaurant);
 
         return NoContent();
-    }
-
-    private bool RestaurantExists(long id)
-    {
-        return _context.Restaurants.Any(e => e.Id == id);
     }
 }

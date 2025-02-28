@@ -6,6 +6,8 @@ public class Order
 
     public DateTime DateTime { get; set; }
 
+    public long TableId { get; set; }
+
     public Table Table { get; set; } = null!;
 
     public List<SubOrder> SubOrders { get; } = [];

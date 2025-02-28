@@ -1,25 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
+using FoodSphere.Services;
 
 namespace FoodSphere.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class WaiterController(FoodSphereContext context) : ControllerBase
+public class WaiterController(WaiterService waiterService) : ControllerBase
 {
-    private readonly FoodSphereContext _context = context;
+    private readonly WaiterService _waiterService = waiterService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Waiter>>> GetWaiter()
+    public async Task<ActionResult<IEnumerable<Waiter>>> GetWaiters()
     {
-        return await _context.Waiters.ToListAsync();
+        var waiters = await _waiterService.Gets();
+        return Ok(waiters);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Waiter>> GetWaiter(long id)
     {
-        var waiter = await _context.Waiters.FindAsync(id);
+        var waiter = await _waiterService.Get(id);
 
         if (waiter == null)
         {
@@ -37,15 +39,13 @@ public class WaiterController(FoodSphereContext context) : ControllerBase
             return BadRequest();
         }
 
-        _context.Entry(waiter).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
+            await _waiterService.Update(waiter);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!WaiterExists(id))
+            if (!_waiterService.Exists(id))
             {
                 return NotFound();
             }
@@ -59,10 +59,14 @@ public class WaiterController(FoodSphereContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Waiter>> PostWaiter(Waiter waiter)
+    public async Task<ActionResult<Waiter>> PostWaiter(Waiter waiterbody)
     {
-        _context.Waiters.Add(waiter);
-        await _context.SaveChangesAsync();
+        var waiter = new Waiter
+        {
+            Name = waiterbody.Name,
+            RestaurantId = waiterbody.RestaurantId
+        };
+        await _waiterService.Add(waiter);
 
         return CreatedAtAction("GetWaiter", new { id = waiter.Id }, waiter);
     }
@@ -70,20 +74,14 @@ public class WaiterController(FoodSphereContext context) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteWaiter(long id)
     {
-        var waiter = await _context.Waiters.FindAsync(id);
+        var waiter = await _waiterService.Get(id);
         if (waiter == null)
         {
             return NotFound();
         }
 
-        _context.Waiters.Remove(waiter);
-        await _context.SaveChangesAsync();
+        await _waiterService.Remove(waiter);
 
         return NoContent();
-    }
-
-    private bool WaiterExists(long id)
-    {
-        return _context.Waiters.Any(e => e.Id == id);
     }
 }

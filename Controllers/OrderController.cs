@@ -1,32 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
+using FoodSphere.Services;
+using FoodSphere.Body;
 
 namespace FoodSphere.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class OrderController(FoodSphereContext context) : ControllerBase
+public class OrderController(OrderService orderService) : ControllerBase
 {
-    private readonly FoodSphereContext _context = context;
+    private readonly OrderService _orderService = orderService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+    public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrders()
     {
-        return await _context.Orders.ToListAsync();
+        var orders = await _orderService.Gets();
+        return Ok(orders.Select(OrderResponse.From));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Order>> GetOrder(long id)
+    public async Task<ActionResult<OrderResponse>> GetOrder(long id)
     {
-        var order = await _context.Orders.FindAsync(id);
+        var order = await _orderService.Get(id);
 
         if (order == null)
         {
             return NotFound();
         }
 
-        return order;
+        return OrderResponse.From(order);
     }
 
     [HttpPut("{id}")]
@@ -37,15 +40,13 @@ public class OrderController(FoodSphereContext context) : ControllerBase
             return BadRequest();
         }
 
-        _context.Entry(order).State = EntityState.Modified;
-
         try
         {
-            await _context.SaveChangesAsync();
+            await _orderService.Update(order);
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!OrderExists(id))
+            if (!_orderService.Exists(id))
             {
                 return NotFound();
             }
@@ -59,10 +60,15 @@ public class OrderController(FoodSphereContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Order>> PostOrder(Order order)
+    public async Task<ActionResult<OrderResponse>> PostOrder(OrderRequest orderbody)
     {
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
+        var order = new Order
+        {
+            DateTime = DateTime.Now,
+            TableId = orderbody.TableId
+        };
+
+        await _orderService.Add(order);
 
         return CreatedAtAction("GetOrder", new { id = order.Id }, order);
     }
@@ -70,20 +76,14 @@ public class OrderController(FoodSphereContext context) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteOrder(long id)
     {
-        var order = await _context.Orders.FindAsync(id);
+        var order = await _orderService.Get(id);
         if (order == null)
         {
             return NotFound();
         }
 
-        _context.Orders.Remove(order);
-        await _context.SaveChangesAsync();
+        await _orderService.Remove(order);
 
         return NoContent();
-    }
-
-    private bool OrderExists(long id)
-    {
-        return _context.Orders.Any(e => e.Id == id);
     }
 }
