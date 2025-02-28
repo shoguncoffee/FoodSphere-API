@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
 using FoodSphere.Services;
-using FoodSphere.Types;
+using FoodSphere.Body;
 
 namespace FoodSphere.Controllers;
 
@@ -13,13 +13,14 @@ public class FoodController(FoodService foodService) : ControllerBase
     private readonly FoodService _foodService = foodService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Food>>> GetFoods()
+    public async Task<ActionResult<IEnumerable<FoodResponse>>> GetFoods()
     {
-        return Ok(await _foodService.Gets());
+        var foods = await _foodService.Gets();
+        return Ok(foods.Select(FoodResponse.From));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Food>> GetFood(long id)
+    public async Task<ActionResult<FoodResponse>> GetFood(long id)
     {
         var food = await _foodService.Get(id);
 
@@ -28,38 +29,38 @@ public class FoodController(FoodService foodService) : ControllerBase
             return NotFound();
         }
 
-        return food;
+        return FoodResponse.From(food);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutFood(long id, Food food)
+    public async Task<IActionResult> PutFood(long id, FoodRequest food)
     {
-        if (id != food.Id)
-        {
-            return BadRequest();
-        }
+        // if (id != food.Id)
+        // {
+        //     return BadRequest();
+        // }
 
-        try
-        {
-            await _foodService.Update(food);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!_foodService.Exists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
+        // try
+        // {
+        //     await _foodService.Update(food);
+        // }
+        // catch (DbUpdateConcurrencyException)
+        // {
+        //     if (!_foodService.Exists(id))
+        //     {
+        //         return NotFound();
+        //     }
+        //     else
+        //     {
+        //         throw;
+        //     }
+        // }
 
         return NoContent();
     }
 
     [HttpPost]
-    public async Task<ActionResult<Food>> PostFood(FoodBody foodbody)
+    public async Task<ActionResult<FoodResponse>> PostFood(FoodRequest foodbody)
     {
         var food = new Food
         {

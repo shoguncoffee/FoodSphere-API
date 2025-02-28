@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
-using FoodSphere.Types;
+using FoodSphere.Body;
 
 namespace FoodSphere.Services;
 

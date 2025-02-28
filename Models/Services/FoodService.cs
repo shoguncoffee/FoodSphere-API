@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
-using FoodSphere.Types;
+using FoodSphere.Body;
 
 namespace FoodSphere.Services;
 
@@ -30,7 +30,7 @@ public class FoodService(FoodSphereContext context)
 
         foreach (var i in ingredients)
         {
-            var item = new FoodIngredientItem
+            var item = new FoodIngredient
             {
                 FoodId = food.Id,
                 IngredientId = i.IngredientId,

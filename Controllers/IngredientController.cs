@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
 using FoodSphere.Services;
-using FoodSphere.Types;
+using FoodSphere.Body;
+using Humanizer;
 
 namespace FoodSphere.Controllers;
 
@@ -13,13 +14,14 @@ public class IngredientController(IngredientService ingredientService) : Control
     private readonly IngredientService _ingredientService = ingredientService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Ingredient>>> GetIngredients()
+    public async Task<ActionResult<IEnumerable<IngredientResponse>>> GetIngredients()
     {
-        return Ok(await _ingredientService.Gets());
+        var ingredients = await _ingredientService.Gets();
+        return Ok(ingredients.Select(IngredientResponse.From));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Ingredient>> GetIngredient(long id)
+    public async Task<ActionResult<IngredientResponse>> GetIngredient(long id)
     {
         var ingredient = await _ingredientService.Get(id);
 
@@ -28,39 +30,44 @@ public class IngredientController(IngredientService ingredientService) : Control
             return NotFound();
         }
 
-        return ingredient;
+        return IngredientResponse.From(ingredient);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutIngredient(long id, Ingredient ingredient)
     {
-        if (id != ingredient.Id)
-        {
-            return BadRequest();
-        }
+        // if (id != ingredient.Id)
+        // {
+        //     return BadRequest();
+        // }
 
-        try
-        {
-            await _ingredientService.Update(ingredient);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!_ingredientService.Exists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
+        // try
+        // {
+        //     await _ingredientService.Update(ingredient);
+        // }
+        // catch (DbUpdateConcurrencyException)
+        // {
+        //     if (!_ingredientService.Exists(id))
+        //     {
+        //         return NotFound();
+        //     }
+        //     else
+        //     {
+        //         throw;
+        //     }
+        // }
 
         return NoContent();
     }
 
     [HttpPost]
-    public async Task<ActionResult<Ingredient>> PostIngredient(Ingredient ingredient)
+    public async Task<ActionResult<IngredientResponse>> PostIngredient(IngredientRequest ingredientbody)
     {
+        var ingredient = new Ingredient
+        {
+            Name = ingredientbody.Name,
+            Stock = ingredientbody.Stock,
+        };
 
         await _ingredientService.Add(ingredient);
 
