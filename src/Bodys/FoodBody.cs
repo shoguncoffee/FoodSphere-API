@@ -62,7 +62,7 @@ public class IngredientResponse
 
     public int Stock { get; set; }
 
-    public static IngredientResponse From(Ingredient ingredient)
+    public static IngredientResponse From(IngredientInfo ingredient)
     {
         return new IngredientResponse
         {

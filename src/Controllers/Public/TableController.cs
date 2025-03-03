@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
 using FoodSphere.Services;
+using FoodSphere.Body;
 
 namespace FoodSphere.Controllers;
 
@@ -64,7 +65,7 @@ public class TableController(TableService tableService) : ControllerBase
         var table = new Table
         {
             Name = tablebody.Name,
-            Seat = tablebody.Seat
+            Capacity = tablebody.Capacity
         };
         await _tableService.Add(table);
 

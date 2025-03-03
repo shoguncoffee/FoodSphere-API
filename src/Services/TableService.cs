@@ -8,7 +8,7 @@ public class TableService(FoodSphereContext context)
 {
     private readonly FoodSphereContext _context = context;
 
-    public async Task<IEnumerable<Table>> Gets()
+    public async Task<List<Table>> Gets()
     {
         return await _context.Tables.ToListAsync();
     }

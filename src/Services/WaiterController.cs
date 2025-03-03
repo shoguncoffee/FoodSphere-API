@@ -8,7 +8,7 @@ public class WaiterService(FoodSphereContext context)
 {
     private readonly FoodSphereContext _context = context;
 
-    public async Task<IEnumerable<Waiter>> Gets()
+    public async Task<List<Waiter>> Gets()
     {
         return await _context.Waiters.ToListAsync();
     }

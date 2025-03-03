@@ -72,7 +72,7 @@ public class TableResponse
         {
             Id = table.Id,
             Name = table.Name,
-            Seat = table.Seat,
+            Seat = table.Capacity,
         };
     }
 }

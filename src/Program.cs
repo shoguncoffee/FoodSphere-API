@@ -5,7 +5,15 @@ using FoodSphere.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<FoodService>();
-builder.Services.AddScoped<IngredientService>();
+builder.Services.AddScoped<IngredientInfoService>();
+builder.Services.AddScoped<IngredientStockService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<SubOrderService>();
+builder.Services.AddScoped<RestaurantService>();
+builder.Services.AddScoped<BranchService>();
+builder.Services.AddScoped<TableService>();
+builder.Services.AddScoped<WaiterService>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

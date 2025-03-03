@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
 using FoodSphere.Services;
+using FoodSphere.Body;
 
 namespace FoodSphere.Controllers;
 

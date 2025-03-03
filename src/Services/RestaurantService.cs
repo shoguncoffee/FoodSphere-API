@@ -4,11 +4,12 @@ using FoodSphere.Body;
 
 namespace FoodSphere.Services;
 
-public class RestaurantService(FoodSphereContext context)
+public class RestaurantService(FoodSphereContext context, BranchService branchService)
 {
     private readonly FoodSphereContext _context = context;
+    private readonly BranchService _branchService = branchService;
 
-    public async Task<IEnumerable<Restaurant>> Gets()
+    public async Task<List<Restaurant>> Gets()
     {
         return await _context.Restaurants.ToListAsync();
     }
@@ -41,7 +42,13 @@ public class RestaurantService(FoodSphereContext context)
 
     public async Task Remove(Restaurant restaurant)
     {
+        foreach (var branch in restaurant.Branches)
+        {
+            await _branchService.Remove(branch);
+        }
+
         _context.Restaurants.Remove(restaurant);
+
         await _context.SaveChangesAsync();
     }
 

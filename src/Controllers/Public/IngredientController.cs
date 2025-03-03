@@ -3,15 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using FoodSphere.Models;
 using FoodSphere.Services;
 using FoodSphere.Body;
-using Humanizer;
 
 namespace FoodSphere.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class IngredientController(IngredientService ingredientService) : ControllerBase
+public class IngredientController(IngredientInfoService ingredientService) : ControllerBase
 {
-    private readonly IngredientService _ingredientService = ingredientService;
+    private readonly IngredientInfoService _ingredientService = ingredientService;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<IngredientResponse>>> GetIngredients()
@@ -34,7 +33,7 @@ public class IngredientController(IngredientService ingredientService) : Control
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutIngredient(long id, Ingredient ingredient)
+    public async Task<IActionResult> PutIngredient(long id, IngredientInfo ingredient)
     {
         // if (id != ingredient.Id)
         // {
@@ -63,7 +62,7 @@ public class IngredientController(IngredientService ingredientService) : Control
     [HttpPost]
     public async Task<ActionResult<IngredientResponse>> PostIngredient(IngredientRequest ingredientbody)
     {
-        var ingredient = new Ingredient
+        var ingredient = new IngredientInfo
         {
             Name = ingredientbody.Name,
             Stock = ingredientbody.Stock,
